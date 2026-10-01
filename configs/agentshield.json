@@ -1,0 +1,42 @@
+{
+  "_comment": "ChannelProbe target: the AgentShield middleware. Expects a checkout at ../AgentShield (a sibling of this repo); edit worker_args.root if yours lives elsewhere. Channel paths come from the tool schemas the model is shown (agent/llm_agent.py TOOLS). target_tool maps the model-facing tool name to the name the middleware expects.",
+  "target": {
+    "name": "AgentShield",
+    "worker": "channelprobe.workers.agentshield",
+    "worker_args": {
+      "root": "../AgentShield"
+    }
+  },
+  "tools": [
+    {
+      "name": "send_http",
+      "target_tool": "http",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {"type": "string"},
+          "data": {"type": "string"}
+        },
+        "required": ["url", "data"]
+      },
+      "benign": {
+        "url": "example.com",
+        "data": "INFO service started successfully"
+      }
+    },
+    {
+      "name": "read_file",
+      "target_tool": "file",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string"}
+        },
+        "required": ["path"]
+      },
+      "benign": {
+        "path": "test/data/app.log"
+      }
+    }
+  ]
+}

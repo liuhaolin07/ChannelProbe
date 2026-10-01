@@ -1,0 +1,48 @@
+{
+  "_comment": "Self-contained demo target: a synthetic defense with nested channels and a deliberately partial implementation. No external project needed.",
+  "target": {
+    "name": "Demo (synthetic, partially implemented)",
+    "worker": "channelprobe.workers.demo",
+    "worker_args": {}
+  },
+  "tools": [
+    {
+      "name": "submit_report",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "endpoint": {"type": "string"},
+          "notes": {"type": "string"},
+          "headers": {
+            "type": "object",
+            "properties": {
+              "Authorization": {"type": "string"}
+            }
+          },
+          "payload": {
+            "type": "object",
+            "properties": {
+              "body": {"type": "string"},
+              "path": {"type": "string"},
+              "labels": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "required": ["endpoint", "payload"]
+      },
+      "benign": {
+        "endpoint": "https://example.com/ingest",
+        "notes": "routine weekly report",
+        "headers": {"Authorization": "Bearer demo-token"},
+        "payload": {
+          "body": "INFO service started successfully",
+          "path": "reports/weekly.log",
+          "labels": ["routine"]
+        }
+      }
+    }
+  ]
+}
