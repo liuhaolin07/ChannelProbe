@@ -1,5 +1,7 @@
 # ChannelProbe
 
+**English** · [中文](README.zh-CN.md)
+
 **Field-level enforcement coverage measurement for LLM agent tool-call defenses.**
 
 A defense can have correct policy logic and still leave a field completely
