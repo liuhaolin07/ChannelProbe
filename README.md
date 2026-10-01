@@ -163,6 +163,8 @@ python -m channelprobe.cli run --config configs/demo_nested.json --out out/demo
 
 Outputs `report.md` (human) and `report.json` (machine) into the `--out` dir.
 
+![Running a ChannelProbe campaign against AgentShield, then reading the per-channel report](docs/demo.gif)
+
 ### Config format
 
 JSON, deliberately, to keep the whole tool dependency-free:
@@ -328,6 +330,8 @@ ChannelProbe/
 │   ├── demo_nested.json      # self-contained: nested channels
 │   └── agentshield.json      # real target
 │                              #   (root: ../AgentShield)
+├── docs/
+│   └── demo.gif              # README demo
 └── tests/
     └── test_channelprobe.py
 ```
