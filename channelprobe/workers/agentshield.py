@@ -20,10 +20,22 @@ from channelprobe.workers.base import respond, serve
 AGENT_NAME = "channelprobe"
 
 
-def make_decide(root: str, policy_path: str, audit_path: str):
-    """Bind the AgentShield middleware into a ``decide(tool, args)`` callable."""
+def make_decide(root: str, policy_path: str, audit_path: str, registry: str = "builtin"):
+    """Bind the AgentShield middleware into a ``decide(tool, args)`` callable.
+
+    ``registry="builtin"`` keeps the V1.6.1 name whitelist (Mode A: name
+    anchoring).  ``registry="experiment"`` resolves the representation-
+    perturbation alias family to the http capability (Mode B: capability
+    anchoring), so alias calls actually reach the sensitive-data scan.
+    """
     sys.path.insert(0, root)
     from security.middleware import check_tool_call  # type: ignore[import-not-found]
+
+    resolved_registry = None
+    if registry == "experiment":
+        from security.capabilities import experiment_registry  # type: ignore[import-not-found]
+
+        resolved_registry = experiment_registry()
 
     def decide(tool: str, args: dict) -> tuple[bool, str]:
         decision = check_tool_call(
@@ -32,6 +44,7 @@ def make_decide(root: str, policy_path: str, audit_path: str):
             agent=AGENT_NAME,
             policy_path=policy_path,
             audit_path=audit_path,
+            registry=resolved_registry,
         )
         return bool(decision.allowed), decision.reason
 
@@ -43,6 +56,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", required=True, help="AgentShield project root")
     parser.add_argument("--policy", default=None, help="path to policy.yaml")
     parser.add_argument("--audit", default=None, help="path to the audit jsonl")
+    parser.add_argument(
+        "--registry",
+        choices=["builtin", "experiment"],
+        default="builtin",
+        help=(
+            "builtin: V1.6.1 name whitelist (Mode A); "
+            "experiment: resolve the perturbation alias family to http "
+            "(Mode B, capability anchoring)"
+        ),
+    )
     args = parser.parse_args(argv)
 
     root = os.path.abspath(args.root)
@@ -56,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     try:
-        decide = make_decide(root, policy_path, audit_path)
+        decide = make_decide(root, policy_path, audit_path, registry=args.registry)
     except Exception as exc:  # noqa: BLE001
         respond({
             "allowed": None,
